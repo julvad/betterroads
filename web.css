@@ -1,0 +1,155 @@
+html, body {height: 100%; margin: 0;}
+				
+				/* Option stylistique de la carte */
+				#Carte { width: 100%; height: 93.5%; z-index: 0;}
+				
+				body {font-family: Arial, Helvetica, sans-serif;}
+				* {box-sizing: border-box;}
+
+				/* Permet de cacher le pop-up tant que le bouton "Éditer la carte" n'est pas sélectionné */
+				.form-popup {
+					display: none;
+				}
+				
+				/* Style du formulaire */
+				.form-container {
+					width: 700px;
+					height: 700px;
+					padding: 50px;
+					background-color: white;
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					margin: -350px 0 0 -350px;
+					border-radius:15px;
+					border-style: solid;
+					z-index: 2;
+				}
+
+				/* Style pour l'input "Description" */
+				.form-container input[type=description] {
+					width: 100%;
+					padding: 15px;
+					margin: 5px 0 22px 0;
+					border-style: groove;
+					background: #f1f1f1;
+				}
+
+				/* Style pour l'input "Nom de la rue" */
+				.form-container input[type=nom_rue] {
+					width: 100%;
+					padding: 15px;
+					margin: 5px 0 22px 0;
+					border-style: groove;
+					background: #f1f1f1;
+				}
+
+				/* Style du menu déroulant */
+				.form-container select {
+					width: 100%;
+					padding: 15px;
+					margin: 5px 0 22px 0;
+					border-style: groove;
+					background: #f1f1f1;
+					font-size: 18px;
+				}
+
+				/* When the inputs get focus, do something */
+				.form-container input[type=description]:focus, .form-container input[type=ptype=nom_rue]:focus, .form-container input[type=ptype=text]:focus {
+					background-color: #ddd;
+					outline: none;
+				}
+
+				/* Style des boutons du pop-up */
+				.form-container .btn {
+					padding: 16px 20px;
+					border-radius:15px;
+					cursor: pointer;
+					width: 100%;
+					margin-bottom: 10px;
+					opacity: 0.75;
+				}
+
+				/* Ajoute une couleur au bouton annuler */
+				.form-container .btn-danger {
+					background-color: red;
+				}
+
+				/* Ajoute une couleur au bouton sauvegarder */
+				.form-container .btn-success {
+					background-color: green;
+				}
+
+				/* Add some hover effects to buttons */
+				.form-container .btn:hover, .open-button:hover {
+					opacity: 1;
+				}
+
+				select option:first-of-type {
+				  	display: none;
+				}
+
+
+				.center {
+					text-align: center;
+				}
+
+				/* Style pour le background inactif */
+				.fullscreen-container {
+				    display: none;
+				    position: fixed;
+				    top: 0;
+				    bottom: 0;
+				    left: 0;
+				    right: 0;
+				    background: rgba(90, 90, 90, 0.5);
+				}
+				
+				div {
+					font-size: 15px;
+				}
+				
+				/*	Ajout d'informations de style spécifiques à la légende*/
+				
+				/*	Ajout d'informations de style spécifique à la boite d'information en haut a gauche*/
+				.info {
+					padding: 16px 16px;
+					font: 14px Arial;
+					background: white;
+					background: rgba(255,255,255,0.8);
+					box-shadow: 0 0 15px rgba(0,0,0,0.5);
+					border-radius: 5px;
+					z-index: 1;
+				}
+				
+				/*	Ajout d'informations de style spécifique à la boite d'information en haut a gauche*/
+				.info h4 {
+					margin: 0 0 5px; color: #777;
+					z-index: 1;
+				}
+				
+				/*	Plus précisement son emplacement et sa dimension*/
+				.legende {
+					padding: 16px 16px;
+					font: 14px Arial;
+					background: white;
+					background: rgba(255,255,255,0.8);
+					box-shadow: 0 0 15px rgba(0,0,0,0.5);
+					border-radius: 5px;
+					z-index: 1;
+					text-align: left;
+					line-height: 18px;
+					color: dark;
+					z-index: 1;
+					width: 300px;
+				}
+				
+				/*	Ajout d'informations de style spécifiques à la légende (police d'écriture, etc...)*/
+				.legende i {
+					font: 12px Helvetica;
+					width: 18px;
+					height: 18px;
+					float: left;
+					margin-right: 150px;
+					opacity: 0.7;
+				}
