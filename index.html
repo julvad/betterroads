@@ -1,12 +1,542 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Better Roads Project</title>
-    <link rel="stylesheet" href="web.css">
-</head>
-<body>
-    <!-- Your HTML body content here -->
-    <script src="web.js"></script>
-</body>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<head>
+			<title>Better Roads Project</title>
+			<meta charset="UTF-8">
+			
+			<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+			<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+			<script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-app.js"></script>
+			<script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-auth.js"></script>
+			<script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-database.js"></script>	
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+			<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+			<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+			
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+			
+			<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin="" />
+			<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.3.0/dist/MarkerCluster.css" />
+			<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.3.0/dist/MarkerCluster.Default.css" />
+			<script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js" integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw==" crossorigin=""></script>
+			<script src="https://unpkg.com/leaflet.markercluster@1.3.0/dist/leaflet.markercluster.js"></script>
+			
+
+			
+			<style>
+				html, body {height: 100%; margin: 0;}
+				
+				/* Option stylistique de la carte */
+				#Carte { width: 100%; height: 93.5%; z-index: 0;}
+				
+				body {font-family: Arial, Helvetica, sans-serif;}
+				* {box-sizing: border-box;}
+
+				/* Permet de cacher le pop-up tant que le bouton "Éditer la carte" n'est pas sélectionné */
+				.form-popup {
+					display: none;
+				}
+				
+				/* Style du formulaire */
+				.form-container {
+					width: 700px;
+					height: 700px;
+					padding: 50px;
+					background-color: white;
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					margin: -350px 0 0 -350px;
+					border-radius:15px;
+					border-style: solid;
+					z-index: 2;
+				}
+
+				/* Style pour l'input "Description" */
+				.form-container input[type=description] {
+					width: 100%;
+					padding: 15px;
+					margin: 5px 0 22px 0;
+					border-style: groove;
+					background: #f1f1f1;
+				}
+
+				/* Style pour l'input "Nom de la rue" */
+				.form-container input[type=nom_rue] {
+					width: 100%;
+					padding: 15px;
+					margin: 5px 0 22px 0;
+					border-style: groove;
+					background: #f1f1f1;
+				}
+
+				/* Style du menu déroulant */
+				.form-container select {
+					width: 100%;
+					padding: 15px;
+					margin: 5px 0 22px 0;
+					border-style: groove;
+					background: #f1f1f1;
+					font-size: 18px;
+				}
+
+				/* When the inputs get focus, do something */
+				.form-container input[type=description]:focus, .form-container input[type=ptype=nom_rue]:focus, .form-container input[type=ptype=text]:focus {
+					background-color: #ddd;
+					outline: none;
+				}
+
+				/* Style des boutons du pop-up */
+				.form-container .btn {
+					padding: 16px 20px;
+					border-radius:15px;
+					cursor: pointer;
+					width: 100%;
+					margin-bottom: 10px;
+					opacity: 0.75;
+				}
+
+				/* Ajoute une couleur au bouton annuler */
+				.form-container .btn-danger {
+					background-color: red;
+				}
+
+				/* Ajoute une couleur au bouton sauvegarder */
+				.form-container .btn-success {
+					background-color: green;
+				}
+
+				/* Add some hover effects to buttons */
+				.form-container .btn:hover, .open-button:hover {
+					opacity: 1;
+				}
+
+				select option:first-of-type {
+				  	display: none;
+				}
+
+
+				.center {
+					text-align: center;
+				}
+
+				/* Style pour le background inactif */
+				.fullscreen-container {
+				    display: none;
+				    position: fixed;
+				    top: 0;
+				    bottom: 0;
+				    left: 0;
+				    right: 0;
+				    background: rgba(90, 90, 90, 0.5);
+				}
+				
+				div {
+					font-size: 15px;
+				}
+				
+				/*	Ajout d'informations de style spécifiques à la légende*/
+				
+				/*	Ajout d'informations de style spécifique à la boite d'information en haut a gauche*/
+				.info {
+					padding: 16px 16px;
+					font: 14px Arial;
+					background: white;
+					background: rgba(255,255,255,0.8);
+					box-shadow: 0 0 15px rgba(0,0,0,0.5);
+					border-radius: 5px;
+					z-index: 1;
+				}
+				
+				/*	Ajout d'informations de style spécifique à la boite d'information en haut a gauche*/
+				.info h4 {
+					margin: 0 0 5px; color: #777;
+					z-index: 1;
+				}
+				
+				/*	Plus précisement son emplacement et sa dimension*/
+				.legende {
+					padding: 16px 16px;
+					font: 14px Arial;
+					background: white;
+					background: rgba(255,255,255,0.8);
+					box-shadow: 0 0 15px rgba(0,0,0,0.5);
+					border-radius: 5px;
+					z-index: 1;
+					text-align: left;
+					line-height: 18px;
+					color: dark;
+					z-index: 1;
+					width: 300px;
+				}
+				
+				/*	Ajout d'informations de style spécifiques à la légende (police d'écriture, etc...)*/
+				.legende i {
+					font: 12px Helvetica;
+					width: 18px;
+					height: 18px;
+					float: left;
+					margin-right: 150px;
+					opacity: 0.7;
+				}
+
+			</style>
+			
+			<!-- Fonction permettant de faire apparaitre un background inactif empechant l'utilisateur de clicker en dehors du formulaire -->
+			<script>
+			  $(function() {
+    
+				$("#BoutonEdit").click(function() {
+			      $(".fullscreen-container").fadeTo(200, 1);
+			    });
+	
+			    $("#cancelBouton").click(function() {
+			      $(".fullscreen-container").fadeOut(200);
+			    });
+	
+			    $("#saveBouton").click(function() {
+			      $(".fullscreen-container").fadeOut(200);
+			    });
+	
+			  });
+			</script>
+			
+		</head>
+	</head>
+	
+	<!--  -->
+	<body>
+		<!-- Ajout d'une barre d'entête -->
+		<nav class="navbar navbar-light bg-light justify-content-between">
+			<a class="navbar-brand">
+			<!-- Ajout du nom et du logo du projet -->
+			<img src="Logo.png" width="32" height="32" class="d-inline-block align-top" alt="">
+			Better Roads Project
+			</a>
+			
+			<!-- Menu déroulant permettant d'appliquer un filtre de données -->
+			<div class="nav-item mr-sm-2" size="6">
+				<select class="custom-select" id ="variable">
+					<!-- Information sur le menu -->
+					<optgroup label="Visualisation des données">
+						<option selected value="tout">Toutes les données disponibles</option>
+						<option value="tout">Toutes les données disponibles</option>
+						<option value="Nid poules">Seulement les nids de poules</option>
+						<option value="Fissures">Seulement les fissures</option>
+						<option value="Travaux">Seulement les zones de travaux</option>
+					</optgroup>
+				</select>
+			</div>
+			
+			<!-- Ajout d'un bouton d'édition et d'un bouton d'information permettant d'ouvrir une fenetre d'information -->
+			<form class="form-inline my-2 my-lg-0">
+				<button id="BoutonEdit" class="btn btn-secondary mr-sm-2" type="button" onclick="editSwitch()">Editer la carte</button>
+				<button class="btn btn-primary my-2 my-sm-0" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Informations</button>
+				<!-- Fenêtre d'information -->
+				<div class="collapse" id="collapseExample">
+					<div class="card card-body">			
+						<br>
+							<b>Production :</b> 
+							Projet universitaire réalisé par Sylvain Passet & Julien Vadnais.
+						</br>
+						<br>
+							<b>But du projet :</b> 
+								Ce projet a pour but de développer une application de géoweb permettant à toutes personnes, le désirant, de recenser un point ou des dégradations sur la routes. Cela pour permettre aux autres utilisateurs de les visualiser. Enfin cela peut potentiellement aider à la prise de decision lors des renovations des routes.
+						</br>
+						<br>
+							<b>Fonctionnment :</b> 
+							Veuillez cliquer sur le bouton 'Éditer la carte' puis cliquer sur la carte à l'endroit voulu. 
+							Et veuillez remplir le formulaire. 
+							Voila ! Votre point a été enregistré.
+						</br>
+					</div>
+				</div>
+			</form>
+			
+		</nav>
+		
+		<div id='Carte'></div>
+		
+		<!-- Invocation du formulaire -->
+		<div class="form-popup" id="myForm">
+		<div class="fullscreen-container">
+		  <form class="form-container">
+    		
+			<!-- Titre du formulaire -->
+		    <div class="center">
+		    	<h1>Informations supplémentaires</h1>
+		    </div>
+    		
+			<!-- Input à menu déroulant -->
+		    <label for="type_accident"><b>Type d'accident</b></label>
+		    <select class="infoSelector" id="accident_type">
+		      <option value="" selected>Veuillez sélectionner une option</option>
+		      <option value="Nid poules">Nid de poule</option>
+		      <option value="Travaux">Travaux</option>
+		      <option value="Fissures">Fissures</option>
+		    </select>
+
+			<!-- Input pour la description de l'accident -->
+		    <label for="description"><b>Description</b></label>
+		    <input id="accDescription" type="description" placeholder="Entrer une description" name="DescriptionAccident">
+    		
+			<!-- Input de la date -->
+		    <label for="date"><b>Date</b></label>
+		    <input id="dateData" type="date" placeholder="Selectionnez la date" name="dateAccident">
+
+		    <div> </div>
+			
+			<!-- Input du nom de la rue -->
+		    <label for="nom_rue"><b>Nom de la rue</b></label>
+		    <input id="streetName" type="nom_rue" placeholder="Entrer un nom de rue" name="NomRue">
+			
+			
+		    <!-- Bouton permettant de sauvergarder les résultats des inputs dans des variables -->
+		    <button type="submit" id="saveBouton" class="btn btn-success">Enregistrer</button>
+			
+			<!-- Bouton permettant d'annuler la prise de données et de fermer le formulaire -->
+		    <button type="button" id="cancelBouton" class="btn btn-danger" onclick="closeForm()">Annuler</button>
+				
+		   </form>
+		</div>
+		
+		<script>
+			// Définition de la varibale permettant l'édition mise a false par défaut
+			var editTime = false
+			// Définition de la variable du filtre de selection de données
+			var filtre = "tout"
+			// Stockage de la fonction de clustering dans une variable
+			var markers = L.markerClusterGroup();
+			
+			// Configuration de l'application WEB de Firebase
+			const firebaseConfig = {
+				apiKey: "AIzaSyAFi6K6wW8tal_malQcWTTjjPnTej2eNFU",
+				authDomain: "geo6303-vp.firebaseapp.com",
+				databaseURL: "https://geo6303-vp-default-rtdb.firebaseio.com",
+				projectId: "geo6303-vp",
+				storageBucket: "geo6303-vp.appspot.com",
+				messagingSenderId: "739486646869",
+				appId: "1:739486646869:web:d09b6f17751354f51b4adc"
+				};
+
+			// Initialisation de Firebase
+			firebase.initializeApp(firebaseConfig)
+			
+			// Préparation de la référence à la bd
+			db = firebase.database()
+			ref = db.ref('features')
+			
+			// Stockage du fond de carte (pathway) dans une variable					
+			fondDeCarte = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoianVsdmFkIiwiYSI6ImNsOHVjajVkaDAyamkzdW5zZ2xoOWJpZnAifQ.O_b7V65Y6Myn6bTGEL8aSA')
+			
+			// Création de la carte avec tout les paramètres
+			maCarte = L.map('Carte', {
+				center: [45.52,-73.63], // centrage
+				zoom: 11, // zoom par défaut
+				layers: fondDeCarte, // utilisation du fond de carte
+				zoomControl: false
+			})
+			
+			// Méthode Firebase pour récupérer les données de la BD en temps réel
+			ref.on('value',getData)
+			
+			// Fonction appelée par ref.on à chaque qu'il y a un changement dans la BD
+			// Récupèration des données des points sur FireBase et stockage dans des variables pour visualisation
+			function getData (data) {
+				features = data.val();
+				console.log(features)
+				f = []
+				for (key in features) {
+					f.push(features[key])
+				}
+				dessiner()
+			}
+			
+			// Permet de dessiner les points sur la carte en prenant en compte le filtre de données
+			function dessiner()	{
+				for (i in f) {
+			
+					if (f[i].properties.typeAccident == filtre || filtre == 'tout') {
+					
+					var marker = L.marker([f[i].geometry.coordinates[0], f[i].geometry.coordinates[1]],
+						{
+							icon: chooseIcon(f[i].properties.typeAccident)
+						}
+					)
+					// Informations contenues dans les pop-up des points
+					marker.bindPopup(
+						'<div><b>Type : </b>' + f[i].properties.typeAccident + '<br><br/>' + 
+						'<b>Nom de la rue : </b>' + f[i].properties.streetName + '<br><br/>' +
+						'<b>Description : </b>'+ f[i].properties.descriptionAccident + '<br><br/>' +
+						'<b>Date : </b>' + f[i].properties.timeAccident +
+						'</div>'
+						)
+					markers.addLayer(marker)
+					}
+				}
+				maCarte.addLayer(markers)
+			}
+			
+			// Event Listener du click sur de la carte pour l'ajout d'un point (si editTime est true)
+			maCarte.on('click', addMarker);
+			var point
+
+			// Permet d'ajouter un point par un click et ajout d'un Pop-Up
+			function addMarker(e){
+				if (editTime == true) {
+					point = e.latlng
+					openForm()	
+				}
+				// Changement du style du curseur "Éditer la carte" quand editTime est de-nouveau false
+				document.getElementById("Carte").style.cursor='grab';
+				document.getElementById("BoutonEdit").style.background='#808080';
+			}
+			
+			// Enregistre les données du formulaire + les coordonnées quand on click sur 'Enregistrer'			
+			saveListener = document.getElementById("saveBouton")
+			saveListener.addEventListener('click', function(event) {
+				saveDataInputs(point)
+			})
+			
+			// Permet de faire apparaitre le formulaire
+			function openForm() {
+				document.getElementById("myForm").style.display = "block";;
+			}
+
+			// Permet de faire disparaitre le formulaire
+			function closeForm() {
+				document.getElementById("myForm").style.display = "none";
+				editTime = false
+			}
+
+			// Permet de sauvegarder les données du formulaire
+			function saveDataInputs(coor){
+			    var accType = document.getElementById("accident_type").value;
+			    var accDesc = document.getElementById("accDescription").value;
+			    var stName = document.getElementById("streetName").value;
+				var accDate = document.getElementById("dateData").value;
+    
+				// Si les inputs du formulaire ne sont pas remplis, déclenchement d'une fonction pour faire une alerte
+				if (accType == "" || accDesc == "" || stName == "" || accDate == "") {
+					alertTrigger()
+				}
+				//Si tout les inputs sont remplis alors les données sont stockées dans des variables et 
+				else {
+					var properties = {
+						  typeAccident : accType,
+						  descriptionAccident : accDesc,
+						  streetName : stName,
+						  timeAccident : accDate,
+						};
+						PtgeoJSON = {"type": "Feature", "properties": properties, "geometry": {"coordinates": [coor.lat,coor.lng], "type": "Point"}}
+						console.log(PtgeoJSON)
+						// Ajout du GeoJSON dans Firebase
+						ref.push(PtgeoJSON)
+						
+						// Remise a jour des données (au cas ou)
+						var accType = 0
+						var accDesc = 0
+						var stName = 0
+						var accDate = 0		
+						coor = 0
+					
+					closeForm()
+				}
+			}
+			
+			// Permet d'activer ou de désactiver le mode d'édition en changeant le style du curseur et du bouton d'édition
+			function editSwitch() {
+				if (editTime == true) {
+					editTime = false
+					document.getElementById("Carte").style.cursor='grab';
+					document.getElementById("BoutonEdit").style.background='#808080';
+				}
+				else {
+					editTime = true
+					document.getElementById("Carte").style.cursor='crosshair';
+					document.getElementById("BoutonEdit").style.background='#00A300';
+				}
+			}
+			
+			
+			// Permet de choisir l'icone correspondant au type de données
+			function chooseIcon(acc) {
+				if (acc == "Nid poules") {
+					var markerIcon = L.icon({
+						iconUrl: 'icones/NidPoule.png',
+						iconSize: [30, 30],
+						iconAnchor: [15, 15]
+				})
+				}
+				else if (acc == "Travaux") {
+					var markerIcon = L.icon({
+						iconUrl: 'icones/Travaux.png',
+						iconSize: [30, 30],
+						iconAnchor: [15, 15]
+				})
+				}
+				else if (acc == "Fissures") {
+					var markerIcon = L.icon( {
+						iconUrl: 'icones/Attention.png',
+						iconSize: [30, 30],
+						iconAnchor: [15, 15]
+				})
+				}
+				
+				return markerIcon
+			}
+			
+			// Lancement de l'alerte si le formulaire n'est pas remplis
+			function alertTrigger() {
+				alert("Veuillez remplir le formulaire au complet !");
+				return false;
+			}
+			
+			// Event sur le menu déroulant pour appliquer un filtre de donnée
+			inputVar = document.getElementById("variable")
+			inputVar.addEventListener('change', function(event) {
+				filtre = event.target.value
+				console.log(filtre)
+				markers.clearLayers();
+				dessiner()
+			})
+			
+			// Ajout des références dans la carte WEB
+			maCarte.attributionControl.addAttribution('Fond de plan OSM & MapBox, production par Julien Vadnais et Sylvain Passet');
+			
+			
+			// Localisation de la légende
+			legende = L.control(
+				{
+					position : 'bottomright' // Localisation de la légende dans la page WEB
+				}
+			)
+			// Création et affichage de la légende
+			legende.onAdd = function(map) {
+				// Création d'un élément <div> dans le DOM, permettant une séparation en HTML
+				div = L.DomUtil.create('div', 'legende') // stylisé en fonction des deux classes
+				
+				// Création de liste pour itérer à travers
+				var accLegende = ["Fissures","Nids de poule","Travaux"]
+				var imgLegende = ['icones/Attention.png', 'icones/NidPoule.png', 'icones/Travaux.png']
+				
+				// Initialisation de la chaîne de caractères qui contiendra le code HTML de la légende
+				elementLegende = "<h4>Type d'accidents</h4><hr>"
+
+				// Boucle traversant les listes des noms de données et d'images pour construire un code HTML produisant la légende
+				for (var i = 0; i < accLegende.length; i++) {
+					elementLegende +=
+						(" <img src="+ imgLegende[i] +" height='40' width='40'>") + '     ' + accLegende[i] + '<br>';
+				}
+				div.innerHTML = elementLegende
+				return div
+			}
+			// Ajout de la légende a la carte
+			legende.addTo(maCarte)	
+		</script>
+	</body>
 </html>
